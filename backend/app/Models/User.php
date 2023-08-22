@@ -17,11 +17,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'phone',
-        'login_code',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -29,9 +25,14 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
+        'login_code',
         'remember_token',
     ];
 
+    public function routeNotificationForTwilio($driver, $notification = null)
+    {
+        return $this->phone;
+    }
 
     public function driver()
     {
