@@ -47,6 +47,6 @@ class LoginController extends Controller
             'login_code' => null
         ]);
 
-        return $user->createToken($request->login_code)->plainTextToken();
+        return $user->createToken($request->login_code)->plainTextToken;
     }
 }
