@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\LocationUpdated;
 use App\Models\Trip;
+use App\Events\TripAccepted;
+use App\Events\TripEnded;
+use App\Events\TripStarted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,6 +27,7 @@ class TripController extends Controller
         return $trip;
     }
 
+
     public function show(Request $request, Trip $trip)
     {
         if ($trip->user->id == Auth::user()->id) {
@@ -36,6 +41,7 @@ class TripController extends Controller
         return response()->json(['message' => 'Trip not found'], 404);
     }
 
+
     public function accept(Request $request, Trip $trip)
     {
         $request->validate([
@@ -45,24 +51,31 @@ class TripController extends Controller
             'driver_id' => $request->user()->id,
             'driver_location' => $request->driver_location
         ]);
+
+        TripAccepted::dispatch($trip, $request->user());
         return $trip;
     }
+
 
     public function start(Request $request, Trip $trip)
     {
         $trip->update([
             'is_started' => 'true'
         ]);
+        TripStarted::dispatch($trip, $request->user());
         return $trip->load('driver.user');
     }
+
 
     public function end(Request $request, Trip $trip)
     {
         $trip->update([
             'is_complete' => 'true'
         ]);
+        TripEnded::dispatch($trip, $request->user());
         return $trip->load('driver.user');
     }
+
 
     public function location(Request $request, Trip $trip)
     {
@@ -73,6 +86,7 @@ class TripController extends Controller
             'driver_location' => $request->driver_location
         ]);
         $trip->load('driver.user');
+        LocationUpdated::dispatch($trip, $this->user());
         return $trip;
     }
 }
